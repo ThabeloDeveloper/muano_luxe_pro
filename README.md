@@ -61,6 +61,41 @@ Reservations expire after 30 minutes and are reconciled every 10 minutes. A late
 
 ### Deployment
 
+#### Cloudflare Workers (website only)
+
+Set the build command to `npm run build` and the deploy command to `npm run deploy`.
+Wrangler publishes only `dist/`, with SPA routing for `/admin`. The configured
+Worker name is `muanoluxe`; match it to the name in your Cloudflare dashboard.
+Firebase remains the backend. This deployment does not need a Firebase CLI login
+and does not deploy Cloud Functions or database rules.
+
+The build log from 3 October shows Cloudflare copied the seed repository into
+`muanoluxe-bot/muanoluxe`. Make sure the repository connected to Workers contains
+these changes; updating the original seed repository does not update an independent copy.
+
+The committed `.env.production` contains only these **public browser settings**,
+so Cloudflare's production build connects to the live Firebase project automatically:
+
+- `VITE_FIREBASE_ENABLED=true`
+- `VITE_FUNCTIONS_REGION=europe-west1`
+- `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`: your public reCAPTCHA Enterprise site key.
+
+Cloudflare build variables can override these values. Development and
+`build:preview` still use preview mode. `muanoluxe.com` has been authorized in
+Firebase Authentication and the production reCAPTCHA Enterprise key. Add any
+additional hostname before using live sign-in and callable services there.
+Keep Gemini and Paystack secret keys in Firebase Secret Manager, never in frontend
+variables. When switching the checkout domain later, update the backend
+`STORE_ORIGIN` and redeploy the affected Firebase functions.
+
+Cloudflare references: [static assets](https://developers.cloudflare.com/workers/static-assets/)
+and [SPA routing](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/).
+
+#### Firebase (backend and optional Firebase Hosting)
+
+Use an authenticated local Firebase CLI or properly configured CI application-default
+credentials. `npm run deploy:firebase` preserves the original full Firebase deployment.
+
 ```powershell
 npm ci --prefix functions
 npm test
