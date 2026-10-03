@@ -1691,3 +1691,25 @@ th {
     width: 65px;
   }
 }
+.wordmark .brand-emblem {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  width: 1em;
+  height: 0.915em;
+  margin-right: 0.3em;
+  vertical-align: -0.05em;
+  mix-blend-mode: multiply;
+}
+.wordmark .brand-emblem img {
+  position: absolute;
+  width: 186.33%;
+  max-width: none;
+  height: auto;
+  left: -43.09%;
+  top: -47.15%;
+}
+.admin-sidebar .wordmark .brand-emblem {
+  display: block;
+  margin: 0 auto 0.4em;
+}

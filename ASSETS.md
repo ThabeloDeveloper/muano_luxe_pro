@@ -12,3 +12,10 @@ Use case: ads-marketing. Create one high resolution photorealistic luxury South 
 ## Product prompt
 
 Use case: product-mockup. Create a luxury clothing ecommerce catalog contact sheet as one image with an exact 2 by 2 grid of FOUR equal square photographic panels, no gutters, no borders, no text. Each item photographed separately on identical light warm gray seamless studio background with very soft shadow, full garment entirely visible with generous 12 percent breathing room inside each panel. TOP LEFT: ivory oversized single breasted women's tailored blazer front view on invisible mannequin. TOP RIGHT: white long sleeve relaxed cotton button-down men's shirt, front view on invisible mannequin. BOTTOM LEFT: sand taupe high waisted wide leg women's trousers, full length front view on invisible mannequin. BOTTOM RIGHT: black fine ribbed sleeveless crewneck fitted women's knit top, front view on invisible mannequin. Premium tactile fabrics, accurate tailoring details, editorial ecommerce ghost mannequin photography, natural drape, consistent camera, no people, no props, no labels, 2048x2048 square image.
+## Owner-supplied logo
+
+`public/images/muanoluxe-logo.jpg` is the original logo supplied by the owner
+(`IMG-20260929-WA0045.jpg`), copied without modifying the image. The storefront
+header, footer and management studio display it through a CSS frame that hides
+the surrounding white margin. This logo is not AI-generated.
+

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import BrandMark from "./BrandMark";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -264,7 +265,7 @@ export default function App() {
       </div>
       <header className="header">
         <a href="/" className="wordmark" aria-label="MuanoLuxe home">
-          MUANO<span>LUXE</span>
+          <BrandMark />MUANO<span>LUXE</span>
           <small>THE ART OF EVERYDAY</small>
         </a>
         <nav aria-label="Main navigation">
@@ -539,7 +540,7 @@ export default function App() {
         <div className="footer-main">
           <div>
             <a className="wordmark" href="/">
-              MUANO<span>LUXE</span>
+              <BrandMark />MUANO<span>LUXE</span>
             </a>
             <p>Quiet confidence. Lasting impression.</p>
             <span className="eyebrow">

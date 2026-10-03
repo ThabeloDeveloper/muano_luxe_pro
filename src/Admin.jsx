@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import BrandMark from "./BrandMark";
 import {
   collection,
   query,
@@ -203,7 +204,7 @@ export default function Admin({
     return (
       <main className="admin-login">
         <a className="wordmark" href="/">
-          MUANO<span>LUXE</span>
+          <BrandMark />MUANO<span>LUXE</span>
         </a>
         <p className="eyebrow">THE MANAGEMENT STUDIO</p>
         <div className="admin-login-card">
@@ -339,7 +340,7 @@ export default function Admin({
     <div className="admin-layout">
       <aside className={`admin-sidebar ${nav ? "open" : ""}`}>
         <a className="wordmark" href="/">
-          MUANO<span>LUXE</span>
+          <BrandMark />MUANO<span>LUXE</span>
           <small>MANAGEMENT STUDIO</small>
         </a>
         <div className="studio-label">
