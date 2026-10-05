@@ -1,7 +1,7 @@
 import { before, test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { initialProducts, defaultSettings } from "../src/catalog.js";
+import { initialProducts, defaultSettings } from "./fixtures/catalog.js";
 const require = createRequire(
   new URL("../functions/package.json", import.meta.url),
 );

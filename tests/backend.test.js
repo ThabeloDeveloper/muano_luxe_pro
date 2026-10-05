@@ -8,7 +8,7 @@ import {
   validateTransition,
   validImage,
 } from "../functions/domain.js";
-import { initialProducts, defaultSettings } from "../src/catalog.js";
+import { initialProducts, defaultSettings } from "./fixtures/catalog.js";
 test("product validation rejects negative/fractional inventory, duplicate colours and unsafe image URLs", () => {
   assert.equal(cleanProduct(initialProducts[0]).name, "The Signature Blazer");
   for (const stock of [-1, 1.5, NaN]) {

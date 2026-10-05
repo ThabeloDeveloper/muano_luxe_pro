@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { addToBag, stockFor, totals } from "../src/commerce.js";
-import { initialProducts, defaultSettings } from "../src/catalog.js";
+import { initialProducts, defaultSettings } from "./fixtures/catalog.js";
 test("bag keeps different colours and sizes separate and aggregates identical variants", () => {
   const p = initialProducts[0];
   let bag = addToBag([], p, "Ivory", "M");
