@@ -9,6 +9,16 @@ import {
   validImage,
 } from "../functions/domain.js";
 import { initialProducts, defaultSettings } from "./fixtures/catalog.js";
+test("server preserves availability and rejects reservations for unavailable products", () => {
+  const p = initialProducts[0];
+  assert.equal(cleanProduct(p).availability, "available");
+  assert.throws(() => cleanProduct({ ...p, availability: "invalid" }), /availability/);
+  for (const availability of ["unavailable", "coming_soon"]) {
+    const restricted = cleanProduct({ ...p, availability });
+    assert.equal(restricted.availability, availability);
+    assert.throws(() => reserve([{ productId: p.id, color: "Ivory", size: "M", quantity: 1 }], new Map([[p.id, restricted]]), defaultSettings), /not currently available/);
+  }
+});
 test("product validation rejects negative/fractional inventory, duplicate colours and unsafe image URLs", () => {
   assert.equal(cleanProduct(initialProducts[0]).name, "The Signature Blazer");
   for (const stock of [-1, 1.5, NaN]) {

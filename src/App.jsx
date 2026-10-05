@@ -66,7 +66,7 @@ import { auth, db, live, call } from "./firebase";
 
 import { initialProducts, defaultSettings } from "./catalog";
 
-import { addToBag, stockFor, totals, lineKey, money } from "./commerce";
+import { addToBag, stockFor, totals, lineKey, money, availabilityLabel } from "./commerce";
 
 const Admin = React.lazy(() => import("./Admin"));
 
@@ -1578,6 +1578,7 @@ function ProductCard({ p, saved, onWish, onOpen }) {
 
       </div>
 
+      <p className="availability-status">{availabilityLabel(p)}</p>
       <div className="product-colors">
 
         <div>
@@ -1690,7 +1691,7 @@ function ProductDetail({ p, onClose, add, saved, onWish }) {
 
               <button
 
-                disabled={!n}
+                disabled={!stockFor(p, color, s)}
 
                 className={s === size ? "active" : ""}
 
@@ -1708,6 +1709,7 @@ function ProductDetail({ p, onClose, add, saved, onWish }) {
 
           </div>
 
+          <p className="availability-status" role="status">{availabilityLabel(p)}</p>
           <p className="stock-note">
 
             {size

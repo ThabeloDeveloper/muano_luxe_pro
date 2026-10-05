@@ -1,3 +1,4 @@
+import { availabilityLabel } from "./commerce";
 import React, { useEffect, useRef, useState } from "react";
 
 import BrandMark from "./BrandMark";
@@ -1236,7 +1237,7 @@ export default function Admin({
 
                           >
 
-                            {p.active ? "Published" : "Draft"}
+                            {p.active ? availabilityLabel(p) : "Draft"}
 
                           </span>
 
@@ -2188,6 +2189,15 @@ function ProductEditor({ product, onClose, onSave, busy }) {
 
             </label>
 
+            <label>
+              Product availability
+              <select value={p.availability || "available"} onChange={(e) => field("availability", e.target.value)}>
+                <option value="available">Available (based on stock)</option>
+                <option value="unavailable">Temporarily unavailable</option>
+                <option value="coming_soon">Coming soon</option>
+              </select>
+              <small>Keep published to display unavailable pieces. Zero stock automatically shows Sold out.</small>
+            </label>
             <label className="checkbox">
 
               <input

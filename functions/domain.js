@@ -34,6 +34,8 @@ export function cleanProduct(p) {
   );
   assert(validImage(p.image), "Product image must be HTTPS or a local image.");
   assert(typeof p.active === "boolean", "Invalid availability.");
+  const availability = p.availability ?? "available";
+  assert(["available", "unavailable", "coming_soon"].includes(availability), "Invalid product availability.");
   assert(
     Array.isArray(p.variants) &&
       p.variants.length > 0 &&
@@ -71,6 +73,7 @@ export function cleanProduct(p) {
     image: p.image,
     tag: text(p.tag || "", 30, "badge", false),
     active: p.active,
+    availability,
     variants,
   };
 }
@@ -127,6 +130,7 @@ export function reserve(items, products, settings) {
   const lines = items.map((i) => {
     const p = updated.get(i.productId);
     assert(p && p.active, "A piece in your bag is no longer available.");
+    assert(!p.availability || p.availability === "available", `${p.name} is not currently available to order.`);
     const variant = p.variants.find((v) => v.color === i.color);
     assert(
       variant &&

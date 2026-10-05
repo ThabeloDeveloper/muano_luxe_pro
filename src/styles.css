@@ -3450,3 +3450,5 @@ th {
 
 @media(max-width: 650px) { .legacy-mood-grid { gap: 12px; } .legacy-mood img { height: 160px; } .legacy-mood figcaption { font-size: 8px; letter-spacing: 1px; } }
 
+
+.availability-status { font-size: 11px; font-weight: 600; color: #555e43; margin: 12px 0; }

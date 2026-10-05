@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addToBag, stockFor, totals } from "../src/commerce.js";
+import { addToBag, stockFor, totals, availabilityLabel } from "../src/commerce.js";
+test("availability blocks stocked products and derives sold-out labels", () => {
+  const p = structuredClone(initialProducts[0]);
+  assert.equal(availabilityLabel(p), "In stock");
+  for (const availability of ["unavailable", "coming_soon"]) {
+    const restricted = { ...p, availability };
+    assert.equal(stockFor(restricted, "Ivory", "M"), 0);
+    assert.throws(() => addToBag([], restricted, "Ivory", "M"));
+  }
+  p.variants.forEach(v => Object.keys(v.sizes).forEach(s => v.sizes[s] = 0));
+  assert.equal(availabilityLabel(p), "Sold out");
+});
 import { initialProducts, defaultSettings } from "./fixtures/catalog.js";
 test("bag keeps different colours and sizes separate and aggregates identical variants", () => {
   const p = initialProducts[0];

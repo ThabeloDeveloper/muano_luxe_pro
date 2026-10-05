@@ -6,8 +6,15 @@ export const money = (value) =>
     maximumFractionDigits: 2,
   }).format(value / 100);
 export const lineKey = (item) => `${item.productId}:${item.color}:${item.size}`;
+export function availabilityLabel(product) {
+  if (!product?.active) return "Not published";
+  if (product.availability === "coming_soon") return "Coming soon";
+  if (product.availability === "unavailable") return "Temporarily unavailable";
+  return product.variants.some(v => Object.values(v.sizes).some(n => n > 0))
+    ? "In stock" : "Sold out";
+}
 export function stockFor(product, color, size) {
-  return product?.active
+  return product?.active && (!product.availability || product.availability === "available")
     ? product.variants.find((v) => v.color === color)?.sizes[size] || 0
     : 0;
 }
