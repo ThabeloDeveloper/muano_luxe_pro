@@ -79,6 +79,7 @@ class _StudioWindowState extends State<StudioWindow> {
         } catch (_) { /* The persistent studio feed remains available if Windows alerts fail. */ }
       }));
       final uri = studioUri!.replace(queryParameters: {...studioUri!.queryParameters, 'desktop':'1'});
+      await toggleAlerts();
       await controller.loadUrl(uri.toString());
       if (mounted) { setState(() { ready = true; error = null; }); }
     } catch (e) { if (mounted) { setState(() { error = 'The studio could not open. Make sure Microsoft Edge WebView2 Runtime is installed, then reopen the app.\n\n$e'; busy = false; }); } }
@@ -88,7 +89,7 @@ class _StudioWindowState extends State<StudioWindow> {
     try {
       await localNotifier.setup(appName: 'MuanoLuxe Studio', shortcutPolicy: ShortcutPolicy.requireCreate);
       setState(() => alerts = true);
-      await LocalNotification(title: 'MuanoLuxe Studio', body: 'Order and subscriber alerts are enabled while the studio is open.').show();
+      await LocalNotification(title: 'MuanoLuxe Studio', body: 'Store activity alerts are enabled, including when Studio is in the system tray.').show();
     } catch (_) { if (mounted) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Windows notifications could not be enabled. Your studio activity feed is still available.'))); } }
   }
   @override
@@ -107,7 +108,7 @@ class _StudioWindowState extends State<StudioWindow> {
       ])),
       if (busy) const LinearProgressIndicator(minHeight: 2, color: Color(0xff879875), backgroundColor: Color(0xffe8ecdf)),
       Expanded(child: error != null ? Center(child: Container(constraints: const BoxConstraints(maxWidth: 550), padding: const EdgeInsets.all(32), child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.window_outlined, size: 42), const SizedBox(height: 24), const Text('Let’s open your studio.', style: TextStyle(fontSize: 28)), const SizedBox(height: 20), Text(error!, textAlign: TextAlign.center), const SizedBox(height: 20), TextButton(onPressed: () => launchUrl(Uri.parse('https://developer.microsoft.com/microsoft-edge/webview2/'), mode: LaunchMode.externalApplication), child: const Text('Get Microsoft Edge WebView2'))]))) : ready ? Webview(controller, permissionRequested: (url, kind, initiated) async => WebviewPermissionDecision.deny) : const Center(child: CircularProgressIndicator())),
-      Container(height: 25, alignment: Alignment.center, child: const Text('Live alerts require the studio to stay open. Staff email sign-in is available in the app; use your browser for Google sign-in.', style: TextStyle(fontSize: 9, color: Color(0xff8a947c)))),
+      Container(height: 25, alignment: Alignment.center, child: const Text('Closing this window keeps alerts running in the system tray. Sign in and stay connected. Quit from the tray to stop alerts.', style: TextStyle(fontSize: 9, color: Color(0xff8a947c)))),
     ]),
   );
 }

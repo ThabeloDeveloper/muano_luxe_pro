@@ -283,11 +283,20 @@ export default function Admin({
           limit(100),
 
         ),
+        { includeMetadataChanges: true },
 
         (s) => {
 
           setEvents(s.docs.map((d) => ({ ...d.data(), id: d.id })));
 
+          if (firstEvents.current && !s.metadata.fromCache) {
+            const unreadCount = s.docs.filter(d => !d.data().read).length;
+            if (unreadCount) window.chrome?.webview?.postMessage(JSON.stringify({
+              type: "notification", title: "Unread store activity",
+              body: `${unreadCount}${s.size === 100 ? "+" : ""} unread updates are waiting in Studio.`,
+            }));
+          }
+          if (s.metadata.fromCache && firstEvents.current) return;
           if (!firstEvents.current)
 
             s.docChanges()
@@ -310,13 +319,13 @@ export default function Admin({
 
                 )
 
-                  new Notification(e.title, {
+                  try { new Notification(e.title, {
 
                     body: e.body,
 
                     icon: "/favicon.svg",
 
-                  });
+                  }); } catch { /* Native alerts and the feed remain available. */ }
 
                 window.chrome?.webview?.postMessage(
 

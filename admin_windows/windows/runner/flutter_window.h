@@ -5,6 +5,7 @@
 #include <flutter/flutter_view_controller.h>
 
 #include <memory>
+#include <shellapi.h>
 
 #include "win32_window.h"
 
@@ -23,6 +24,12 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  NOTIFYICONDATAW tray_{};
+  bool tray_ready_ = false;
+  bool startup_enabled_ = false;
+  void AddTray();
+  void SetStartup(bool enabled);
+
   // The project to run.
   flutter::DartProject project_;
 

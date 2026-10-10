@@ -21,3 +21,12 @@ https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 The app is not code-signed. Windows may display an unrecognized-app notice.
 Enable alerts using the bell button; notifications require the app to stay open.
+
+BACKGROUND ALERTS
+Keep the extracted app folder in a permanent location. Sign in to Studio once.
+Closing the window leaves Studio running in the Windows notification tray.
+Right-click the tray icon to open Studio, toggle Start with Windows, or Quit.
+Start with Windows is enabled by default after the app first runs.
+Use Quit to stop the process and notifications. An offline or sleeping laptop
+cannot deliver real-time alerts; the Studio feed retains activity for review.
+Windows notification settings / Do Not Disturb can suppress banners.

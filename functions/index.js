@@ -1,3 +1,7 @@
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
+import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { onUserCreated, onUserDeleted } from "firebase-functions/v2/identity";
+import { activityFor } from "./activity.js";
 import { siteMedia } from "./site-media.js";
 import { readFileSync } from "node:fs";
 import { initializeApp } from "firebase-admin/app";
@@ -718,4 +722,34 @@ export const siteImage = onRequest({ invoker: "public" }, async (req, res) => {
   }
   res.set("Cache-Control", "public, max-age=60, s-maxage=300");
   return res.redirect(302, image.startsWith("/") ? `https://muanoluxe.com${image}` : image);
+});
+
+async function recordActivity(id, activity) {
+  if (!activity) return;
+  const key = createHash("sha256").update(id).digest("hex");
+  try {
+    await db.doc(`notifications/activity-${key}`).create({ ...activity, createdAt: stamp(), read: false });
+  } catch (error) {
+    if (error.code !== 6 && error.code !== "already-exists") throw error;
+  }
+}
+const businessActivity = collection => onDocumentWritten({ document: `${collection}/{id}`, retry: true }, async e => {
+  await recordActivity(e.id, activityFor(collection, e.data?.before.data(), e.data?.after.data()));
+});
+export const productActivity = businessActivity("products");
+export const settingsActivity = businessActivity("settings");
+export const subscriptionActivity = businessActivity("subscribers");
+export const orderActivity = businessActivity("orders");
+export const conversationActivity = onDocumentWritten({ document: "conversations/{conversation}/messages/{message}", retry: true }, async e => {
+  await recordActivity(e.id, activityFor("messages", e.data?.before.data(), e.data?.after.data()));
+});
+export const imageActivity = onObjectFinalized({ retry: true }, async e => {
+  if (!e.data.name?.startsWith("products/")) return;
+  await recordActivity(e.id, { type: "image", title: "Image uploaded", body: "A product or website image was uploaded to Studio." });
+});
+export const accountCreatedActivity = onUserCreated({ retry: true }, async e => {
+  await recordActivity(e.id, { type: "account", title: "New customer account", body: "A customer signed up to MuanoLuxe." });
+});
+export const accountDeletedActivity = onUserDeleted({ retry: true }, async e => {
+  await recordActivity(e.id, { type: "account", title: "Customer account removed", body: "A customer account was deleted." });
 });

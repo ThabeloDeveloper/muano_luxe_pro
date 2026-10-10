@@ -155,3 +155,14 @@ test("public image endpoint only resolves named slots and follows updated settin
   await functions.siteImage({ method: "GET", query: { slot: "informationImage" } },res);
   assert.equal(res.url,"https://muanoluxe.com/images/updated.png");
 });
+
+test("activity delivery retries do not duplicate notifications", async () => {
+  const e={id:"test-activity-retry",params:{id:"tee"},data:{before:{data:()=>({name:"Tee",revision:1})},after:{data:()=>({name:"Tee",revision:2})}}};
+  await functions.productActivity.run(e);
+  await functions.productActivity.run(e);
+  const {createHash}=await import("node:crypto");
+  const id=createHash("sha256").update(e.id).digest("hex");
+  const snap=await db.doc(`notifications/activity-${id}`).get();
+  assert.equal(snap.data().title,"Product or stock updated");
+  assert.equal(snap.data().read,false);
+});
