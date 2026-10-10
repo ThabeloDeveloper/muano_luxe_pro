@@ -775,3 +775,12 @@
     font-size: 38px;
   }
 }
+
+.site-images { grid-column: 1 / -1; min-width: 0; }
+.site-images > p { font-size: 13px; line-height: 1.7; color: #666; }
+.site-image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+.site-image-grid fieldset { min-width: 0; border: 1px solid #ddd; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.site-image-grid legend { font-size: 13px; padding: 0 6px; }
+.site-image-grid img { width: 100%; height: 150px; object-fit: contain; background: #f4f3ef; }
+.site-image-grid input[type=file] { width: 100%; font-size: 12px; }
+.site-image-grid .button { margin-top: auto; }

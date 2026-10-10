@@ -1,3 +1,4 @@
+import SiteImages from "./SiteImages";
 import Conversations from "./Conversations";
 import { availabilityLabel } from "./commerce";
 import React, { useEffect, useRef, useState } from "react";
@@ -413,7 +414,7 @@ export default function Admin({
 
         <a className="wordmark" href="/">
 
-          <BrandMark />MUANO<span>LUXE</span>
+          <BrandMark src={settings.logoImage} />MUANO<span>LUXE</span>
 
         </a>
 
@@ -685,7 +686,7 @@ export default function Admin({
 
         <a className="wordmark" href="/">
 
-          <BrandMark />MUANO<span>LUXE</span>
+          <BrandMark src={settings.logoImage} />MUANO<span>LUXE</span>
 
           <small>MANAGEMENT STUDIO</small>
 
@@ -2441,7 +2442,8 @@ function ProductEditor({ product, onClose, onSave, busy }) {
 
 function SettingsForm({ settings, onSave, busy, onSeed }) {
 
-  const [s, setS] = useState(settings);
+  const [s, setS] = useState({ ...defaultSettings, ...settings });
+  const [uploading, setUploading] = useState(false);
 
   const f = (k, v) => setS((s) => ({ ...s, [k]: v }));
 
@@ -2457,13 +2459,14 @@ function SettingsForm({ settings, onSave, busy, onSeed }) {
 
           e.preventDefault();
 
-          onSave(s);
+          if (!uploading) onSave(s);
 
         }}
 
       >
 
         <h2>The storefront</h2>
+        <SiteImages settings={s} onChange={f} onUploading={setUploading} disabled={busy || uploading} />
 
         <label>
 
@@ -2523,21 +2526,7 @@ function SettingsForm({ settings, onSave, busy, onSeed }) {
 
         </label>
 
-        <label>
 
-          Hero image URL
-
-          <input
-
-            value={s.heroImage}
-
-            onChange={(e) => f("heroImage", e.target.value)}
-
-            required
-
-          />
-
-        </label>
 
         <h3>Brand story & newsletter</h3>
 
@@ -2575,21 +2564,7 @@ function SettingsForm({ settings, onSave, busy, onSeed }) {
 
         ))}
 
-        <label>
 
-          Story image URL
-
-          <input
-
-            value={s.storyImage}
-
-            onChange={(e) => f("storyImage", e.target.value)}
-
-            required
-
-          />
-
-        </label>
 
         <h3>Delivery & client services</h3>
 
@@ -2739,7 +2714,7 @@ function SettingsForm({ settings, onSave, busy, onSeed }) {
 
         </label>
 
-        <button className="button dark" disabled={busy}>
+        <button className="button dark" disabled={busy || uploading}>
 
           {busy ? "Saving…" : "Save store settings"} <Check size={16} />
 
@@ -2763,7 +2738,7 @@ function SettingsForm({ settings, onSave, busy, onSeed }) {
 
           </p>
 
-          <button className="button" disabled={busy} onClick={onSeed}>
+          <button className="button" disabled={busy || uploading} onClick={onSeed}>
 
             Import starter collection
 

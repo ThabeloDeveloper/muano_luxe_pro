@@ -124,3 +124,9 @@ See `VERIFICATION.md` for actual run results and remaining activation checks. Vi
 ## References
 
 [Firebase Flutter platform support](https://firebase.google.com/docs/flutter/setup), [Firebase App Check](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider), [Paystack checkout](https://paystack.com/docs/payments/accept-payments/), [Paystack webhook validation](https://paystack.com/docs/payments/webhooks/), [Gemini 3.8 Flash](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash).
+
+## Studio website images
+
+In Studio, open **Store settings → Website images** to replace the logo, browser/search icon, social sharing image, homepage hero, story image, three editorial images, and the image shared by the collection/about/contact pages. Upload JPEG, PNG or WebP files smaller than 5 MB, or supply an HTTPS URL. Preview each image and select **Save store settings** to apply it. **Restore original** resets an individual slot. Product and colour images remain editable under Products. Uploads use the existing administrator-only `products/` Storage permissions; uploading alone does not change the storefront.
+
+Deploy the updated `saveSettings` and new public `siteImage` Firebase functions **before** publishing the frontend. The public endpoint only redirects named image slots and exposes no private settings. Static pages, browser icons and sharing metadata use these stable image URLs; redirects cache for up to five minutes, and external crawlers can cache longer. Storefront images use the live settings listener. Old settings clients preserve the new image fields when saving. No Mailgun integration or welcome email was added.

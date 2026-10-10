@@ -3464,3 +3464,5 @@ th {
 @media(max-width: 800px) { .conversation-workspace { grid-template-columns: 1fr; } }
 
 .search-page-links { display:flex; flex-wrap:wrap; gap:24px; padding:24px 0; font-size:12px; border-bottom:1px solid var(--line); }
+
+.wordmark .brand-emblem.custom-logo img { position: static; width: 100%; height: 100%; object-fit: contain; }

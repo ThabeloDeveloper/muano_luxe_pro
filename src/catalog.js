@@ -1,3 +1,4 @@
+import { mediaDefaults } from "../functions/site-media.js";
 export const colors = { Ivory: "#e7e0d2", Onyx: "#191a18", Olive: "#62694c" };
 
 const variant = (color, image) => ({ color, hex: colors[color], image, sizes: { XS: 4, S: 8, M: 12, L: 8, XL: 4 } });
@@ -29,6 +30,7 @@ export const initialProducts = [
 ];
 
 export const defaultSettings = {
+  ...mediaDefaults,
 
   storyTitle: "Built from vision.\nCrafted for legacy.",
 

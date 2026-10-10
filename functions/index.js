@@ -1,3 +1,4 @@
+import { siteMedia } from "./site-media.js";
 import { readFileSync } from "node:fs";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
@@ -520,6 +521,12 @@ function cleanSettings(s) {
     terms: 6000,
   }))
     out[k] = text(s[k], max, k);
+  for (const key of Object.keys(siteMedia)) {
+    if (s[key] !== undefined) {
+      assert(validImage(s[key]), `Invalid ${siteMedia[key].label.toLowerCase()} image.`);
+      out[key] = s[key];
+    }
+  }
   assert(validImage(s.heroImage), "Invalid hero image.");
   out.heroImage = s.heroImage;
   assert(validImage(s.storyImage), "Invalid story image.");
@@ -559,7 +566,7 @@ export const saveSettings = onCall(
       );
     await db
       .doc("settings/store")
-      .set({ ...cleanSettings(r.data.settings), updatedAt: stamp() });
+      .set({ ...cleanSettings(r.data.settings), updatedAt: stamp() }, { merge: true });
     return { ok: true };
   }),
 );
@@ -696,3 +703,19 @@ export const shoppingAssistant = onCall(
     }
   }),
 );
+
+// Stable URLs allow crawlers and static information pages to use Studio-managed images.
+export const siteImage = onRequest({ invoker: "public" }, async (req, res) => {
+  const slot = typeof req.query.slot === "string" ? req.query.slot : "";
+  if (!Object.hasOwn(siteMedia, slot)) return res.status(404).send("Unknown image.");
+  if (!["GET", "HEAD"].includes(req.method)) return res.status(405).set("Allow", "GET, HEAD").send("Method not allowed.");
+  let image = siteMedia[slot].fallback;
+  try {
+    const settings = (await db.doc("settings/store").get()).data();
+    if (validImage(settings?.[slot])) image = settings[slot];
+  } catch (error) {
+    console.error("Site image settings unavailable:", error.message);
+  }
+  res.set("Cache-Control", "public, max-age=60, s-maxage=300");
+  return res.redirect(302, image.startsWith("/") ? `https://muanoluxe.com${image}` : image);
+});

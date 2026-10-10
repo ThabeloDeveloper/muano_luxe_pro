@@ -533,7 +533,7 @@ export default function App() {
 
         <a href="/" className="wordmark" aria-label="MuanoLuxe home">
 
-          <BrandMark />MUANO<span>LUXE</span>
+          <BrandMark src={settings.logoImage} />MUANO<span>LUXE</span>
 
           <small>THE ART OF EVERYDAY</small>
 
@@ -1067,11 +1067,11 @@ export default function App() {
 
           <div className="legacy-mood-grid">
 
-            <figure><img src="/images/IMG-20260927-WA0025.jpg" alt="Illuminated runway inspiring the Runway print" loading="lazy"/><figcaption>01 — THE VISION</figcaption></figure>
+            <figure><img src={settings.visionImage} alt="Illuminated runway inspiring the Runway print" loading="lazy"/><figcaption>01 — THE VISION</figcaption></figure>
 
-            <figure><img src="/images/IMG-20260927-WA0024.jpg" alt="Sculptural folds of olive fabric" loading="lazy"/><figcaption>02 — THE PALETTE</figcaption></figure>
+            <figure><img src={settings.paletteImage} alt="Sculptural folds of olive fabric" loading="lazy"/><figcaption>02 — THE PALETTE</figcaption></figure>
 
-            <figure><img src="/images/IMG-20260927-WA0021.jpg" alt="MuanoLuxe monogram in white on black" loading="lazy"/><figcaption>03 — THE SIGNATURE</figcaption></figure>
+            <figure><img src={settings.signatureImage} alt="MuanoLuxe monogram in white on black" loading="lazy"/><figcaption>03 — THE SIGNATURE</figcaption></figure>
 
           </div>
 
@@ -1100,7 +1100,7 @@ export default function App() {
 
             <a className="wordmark" href="/">
 
-              <BrandMark />MUANO<span>LUXE</span>
+              <BrandMark src={settings.logoImage} />MUANO<span>LUXE</span>
 
             </a>
 

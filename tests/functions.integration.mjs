@@ -129,3 +129,29 @@ test("store settings save through administrator validation", async () => {
   );
   assert.equal((await db.doc("settings/store").get()).data().published, false);
 });
+
+test("site images require admin, persist and survive older settings clients", async () => {
+  const settings = { ...defaultSettings, logoImage: "https://example.com/logo.png", visionImage: "/images/vision.png" };
+  await assert.rejects(() => functions.saveSettings.run(request({ settings })), /Administrator access/);
+  await functions.saveSettings.run(request({ settings }, true));
+  assert.equal((await db.doc("settings/store").get()).data().logoImage, settings.logoImage);
+  await functions.saveSettings.run(request({ settings: defaultSettings }, true));
+  assert.equal((await db.doc("settings/store").get()).data().logoImage, settings.logoImage);
+  await assert.rejects(() => functions.saveSettings.run(request({ settings: { ...settings, paletteImage: "javascript:alert(1)" } }, true)), /Invalid/);
+});
+
+test("public image endpoint only resolves named slots and follows updated settings", async () => {
+  const response = () => ({ code: 200, headers: {}, status(n) { this.code=n; return this; }, set(k,v) { this.headers[k]=v; return this; }, send(body) { this.body=body; return this; }, redirect(code,url) { this.code=code; this.url=url; return this; } });
+  let res=response();
+  await functions.siteImage({ method: "GET", query: { slot: "__proto__" } },res);
+  assert.equal(res.code,404);
+  await db.doc("settings/store").set({ informationImage: "https://example.com/new-campaign.png" },{merge:true});
+  res=response();
+  await functions.siteImage({ method: "GET", query: { slot: "informationImage" } },res);
+  assert.equal(res.code,302);
+  assert.equal(res.url,"https://example.com/new-campaign.png");
+  await db.doc("settings/store").set({ informationImage: "/images/updated.png" },{merge:true});
+  res=response();
+  await functions.siteImage({ method: "GET", query: { slot: "informationImage" } },res);
+  assert.equal(res.url,"https://muanoluxe.com/images/updated.png");
+});
