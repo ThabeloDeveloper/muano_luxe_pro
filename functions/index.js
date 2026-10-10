@@ -5,7 +5,7 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { defineSecret, defineString } from "firebase-functions/params";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import {
   assert,
   text,
@@ -612,20 +612,31 @@ export const shoppingAssistant = onCall(
   checked(async (r) => {
     await rateLimit(r, "assistant", 20);
     const message = text(r.data.message, 1000, "message");
-    const history = Array.isArray(r.data.history)
-      ? r.data.history
-          .slice(-8)
-          .filter(
-            (m) =>
-              ["user", "assistant"].includes(m.role) &&
-              typeof m.text === "string",
-          )
-          .map((m) => ({
-            role: m.role === "assistant" ? "model" : "user",
-            parts: [{ text: m.text.slice(0, 1500) }],
-          }))
-      : [];
-    while (history[0]?.role === "model") history.shift();
+    const sessionId = r.data.sessionId || randomUUID();
+    const requestId = r.data.requestId || randomUUID();
+    if (![sessionId, requestId].every(v => typeof v === "string" && /^[a-zA-Z0-9-]{20,100}$/.test(v)))
+      throw new HttpsError("invalid-argument", "Invalid conversation session.");
+    const conversationId = createHash("sha256").update(`${r.auth?.uid || 'guest'}:${sessionId}`).digest("hex");
+    const conversation = db.doc(`conversations/${conversationId}`);
+    const turn = conversation.collection("messages").doc(requestId);
+    const existing = await db.runTransaction(async t => {
+      const previous = await t.get(turn);
+      if (previous.exists) return previous.data();
+      t.set(conversation, { source: "ai", userId: r.auth?.uid || null, preview: message.slice(0,160), updatedAt: stamp() }, { merge: true });
+      t.create(turn, { userText: message, assistantText: "", status: "pending", createdAt: stamp() });
+      return null;
+    });
+    if (existing) {
+      if (existing.userText !== message) throw new HttpsError("invalid-argument", "Message ID already used.");
+      if (existing.status === "complete") return {text:existing.assistantText};
+      throw new HttpsError("unavailable", "This message is already being processed or could not be answered. Please send a new message.");
+    }
+    try {
+    const previousTurns = await conversation.collection("messages").orderBy("createdAt", "desc").limit(9).get();
+    const history = previousTurns.docs.reverse().filter(d=>d.id !== requestId && d.data().status === "complete").flatMap(d=>[
+      {role:"user",parts:[{text:d.data().userText.slice(0,1000)}]},
+      {role:"model",parts:[{text:d.data().assistantText.slice(0,3000)}]},
+    ]);
     const [catalog, settings] = await Promise.all([
       db.collection("products").where("active", "==", true).limit(50).get(),
       db.doc("settings/store").get(),
@@ -637,7 +648,8 @@ export const shoppingAssistant = onCall(
         priceZAR: p.price / 100,
         category: p.category,
         description: p.description,
-        variants: p.variants.map((v) => ({ color: v.color, sizes: v.sizes })),
+        availability: p.availability || "available",
+        variants: (p.variants || []).map((v) => ({ color: v.color, sizes: v.sizes })),
       };
     });
     const response = await fetch(
@@ -671,12 +683,16 @@ export const shoppingAssistant = onCall(
         "The assistant is busy. Please try again shortly.",
       );
     const data = await response.json();
-    return {
-      text:
-        data.candidates?.[0]?.content?.parts
-          ?.map((p) => p.text || "")
-          .join("") ||
-        "I can help with our collection, sizes, and styling. What would you like to explore?",
-    };
+    const answer = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") ||
+      "I can help with our collection, sizes, and styling. What would you like to explore?";
+    const batch = db.batch();
+    batch.update(turn, {assistantText: answer, status: "complete", completedAt: stamp()});
+    batch.set(conversation, {updatedAt:stamp()}, {merge:true});
+    await batch.commit();
+    return {text:answer};
+    } catch (error) {
+      await turn.update({status:"failed", completedAt:stamp()});
+      throw error;
+    }
   }),
 );

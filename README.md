@@ -38,8 +38,10 @@ The admin role cannot be granted from the storefront. With an authorized applica
 The Flutter app embeds the same management studio with Microsoft Edge WebView2, adds native Windows notifications, and supports a self-contained preview. This avoids relying on the native Firebase Windows SDK, which Firebase describes as intended for local development rather than production.
 
 ```powershell
-# Standalone preview with bundled site assets:
+# Connected portable Windows package (default):
 npm run build:windows
+# Explicit standalone preview:
+powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Preview
 # Connected app after the storefront is hosted:
 powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -StoreUrl https://muanoluxe.web.app/admin
 ```

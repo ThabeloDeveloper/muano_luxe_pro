@@ -1,3 +1,4 @@
+import { normalizePhone } from "./phone";
 import React, { useEffect, useRef, useState } from "react";
 
 import BrandMark from "./BrandMark";
@@ -1091,6 +1092,7 @@ export default function App() {
       </main>
 
       <footer>
+        <nav className="search-page-links" aria-label="About the store"><a href="/collection/">The Legacy Collection</a><a href="/about/">About MuanoLuxe</a><a href="/contact/">Contact us</a></nav>
 
         <div className="footer-main">
 
@@ -1175,12 +1177,6 @@ export default function App() {
               </a>
 
             )}
-
-            <a href="/admin">
-
-              MuanoLuxe Studio <ArrowUpRight size={12} />
-
-            </a>
 
             <div className="footer-location">South Africa · ZAR</div>
 
@@ -1480,7 +1476,7 @@ export default function App() {
 
                 ? "MuanoLuxe is a South African clothing label built around a simple idea: getting dressed should feel effortless. We explore clean lines, tactile textures, and versatile silhouettes, creating a wardrobe that leaves space for the person wearing it."
 
-                : settings[modal]}
+                : modal === "privacyPolicy" ? `${settings[modal]} Shopping assistant messages and AI replies are stored for administrator review and customer support. Contact muanoluxe@gmail.com to request deletion; guest users should provide the time and topic of the chat so we can locate it.` : settings[modal]}
 
             </p>
 
@@ -2080,7 +2076,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
       setError(
 
-        e.code === "auth/popup-closed-by-user"
+        !e.code && e.message?.startsWith("Enter a") ? e.message : e.code === "auth/popup-closed-by-user"
 
           ? "Sign-in was cancelled. You can try again."
 
@@ -2160,6 +2156,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
             } else {
 
+              normalizePhone(phone);
               captcha.current ||= new RecaptchaVerifier(
 
                 auth,
@@ -2172,7 +2169,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
               setConfirmation(
 
-                await signInWithPhoneNumber(auth, phone, captcha.current),
+                await signInWithPhoneNumber(auth, normalizePhone(phone), captcha.current),
 
               );
 
@@ -2198,11 +2195,13 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
             onChange={(e) => setPhone(e.target.value)}
 
-            placeholder="+27 82 123 4567"
+            placeholder="082 123 4567"
+            autoComplete="tel"
+            aria-describedby="phone-format-help"
 
             required
 
-            pattern="\+[1-9][0-9]{7,14}"
+            maxLength={25}
 
             disabled={!!confirmation}
 
@@ -2210,6 +2209,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
         </label>
 
+        <p id="phone-format-help" className="body-copy">South African numbers may start with 0. For other countries, include + and the country code. A verification SMS is required.</p>
         {confirmation && (
 
           <label>
@@ -2827,6 +2827,12 @@ function Newsletter({ notify }) {
 }
 
 function Chat({ onClose, products, settings }) {
+  const session = useRef(null);
+  if (!session.current) {
+    try { session.current = sessionStorage.getItem('muanoluxe-chat-session') || crypto.randomUUID(); sessionStorage.setItem('muanoluxe-chat-session', session.current); }
+    catch { session.current = crypto.randomUUID(); }
+  }
+
 
   const [messages, setMessages] = useState([
 
@@ -2875,6 +2881,8 @@ function Chat({ onClose, products, settings }) {
             message: text,
 
             history: messages.slice(-8),
+            sessionId: session.current,
+            requestId: crypto.randomUUID(),
 
           })
 
@@ -2962,6 +2970,7 @@ function Chat({ onClose, products, settings }) {
 
       </header>
 
+      <p className="chat-disclosure">AI can make mistakes. Messages and replies are saved for the MuanoLuxe team to review and provide support. Please do not share sensitive information.</p>
       <div className="chat-messages" aria-live="polite">
 
         {messages.map((m, i) => (

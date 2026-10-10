@@ -1,3 +1,4 @@
+import Conversations from "./Conversations";
 import { availabilityLabel } from "./commerce";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -84,6 +85,7 @@ const sections = [
   { name: "Orders", icon: ShoppingBag },
 
   { name: "Subscribers", icon: Users },
+  { name: "Conversations", icon: Users },
 
   { name: "Notifications", icon: Bell },
 
@@ -1275,6 +1277,7 @@ export default function Admin({
 
           )}
 
+          {section === "Conversations" && <Conversations />}
           {section === "Orders" && (
 
             <section className="admin-card">

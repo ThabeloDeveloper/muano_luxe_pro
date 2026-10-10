@@ -1,0 +1,23 @@
+MUANOLUXE STUDIO - WINDOWS
+
+1. Copy this ZIP to your Windows 10/11 laptop (64-bit Intel/AMD).
+2. Right-click the ZIP and choose Extract All.
+3. Keep all extracted files and folders together.
+4. Open muanoluxe_studio.exe from the extracted folder.
+
+This release connects to https://muanoluxe.web.app/admin.
+It needs an internet connection, but no local server, Node.js, Flutter,
+Firebase tools, or connection to the developer's laptop.
+
+Sign in with an authorized staff email and password. Use "Set or reset
+staff password" if needed. For Google sign-in, use the app's browser button.
+Each laptop signs in separately. Never share passwords in the ZIP.
+
+If WebView2 is missing, install Microsoft's Evergreen WebView2 Runtime:
+https://developer.microsoft.com/microsoft-edge/webview2/
+If Windows reports VCRUNTIME140.dll or MSVCP140.dll missing, install the
+Microsoft Visual C++ Redistributable (x64):
+https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+The app is not code-signed. Windows may display an unrecognized-app notice.
+Enable alerts using the bell button; notifications require the app to stay open.

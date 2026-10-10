@@ -1,9 +1,9 @@
-param([string]$StoreUrl = '', [switch]$Preview)
+param([string]$StoreUrl = 'https://muanoluxe.web.app/admin', [switch]$Preview)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $projectRoot
 try {
-  npm.cmd run build:preview
+  npm.cmd run build:preview -- --outDir artifacts/windows-preview
   if ($LASTEXITCODE -ne 0) { throw 'Website build failed.' }
   $assetRoot = Join-Path $projectRoot 'admin_windows\assets\site'
   if (Test-Path -LiteralPath $assetRoot) {
@@ -13,19 +13,20 @@ try {
     Remove-Item -LiteralPath $resolvedAssets -Recurse -Force
   }
   New-Item -ItemType Directory -Force $assetRoot | Out-Null
-  Copy-Item -Path (Join-Path $projectRoot 'dist\*') -Destination $assetRoot -Recurse -Force
+  Copy-Item -Path (Join-Path $projectRoot 'artifacts\windows-preview\*') -Destination $assetRoot -Recurse -Force
   Push-Location (Join-Path $projectRoot 'admin_windows')
   try {
     flutter pub get
     if ($LASTEXITCODE -ne 0) { throw 'Flutter dependency resolution failed.' }
-    if ($Preview -or -not $StoreUrl) { flutter build windows --release }
+    if ($Preview) { flutter build windows --release '--dart-define=STUDIO_PREVIEW=true' }
     else { flutter build windows --release "--dart-define=STORE_URL=$StoreUrl" }
     if ($LASTEXITCODE -ne 0) { throw 'Windows build failed.' }
   } finally { Pop-Location }
   $release = Join-Path $projectRoot 'admin_windows\build\windows\x64\runner\Release'
   $output = Join-Path $projectRoot 'releases'
   New-Item -ItemType Directory -Force $output | Out-Null
-  $name = if ($Preview -or -not $StoreUrl) { 'MuanoLuxe-Studio-Windows-Preview.zip' } else { 'MuanoLuxe-Studio-Windows.zip' }
+  Copy-Item -LiteralPath (Join-Path $projectRoot 'admin_windows\RUN-ME.txt') -Destination (Join-Path $release 'RUN-ME.txt') -Force
+  $name = if ($Preview) { 'MuanoLuxe-Studio-Windows-Preview.zip' } else { 'MuanoLuxe-Studio-Windows.zip' }
   Compress-Archive -Path "$release\*" -DestinationPath (Join-Path $output $name) -Force
   Write-Output "Windows package: $output\$name"
 } finally { Pop-Location }

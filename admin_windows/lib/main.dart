@@ -7,7 +7,8 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_windows/webview_windows.dart';
 
-const configuredUrl = String.fromEnvironment('STORE_URL');
+const previewMode = bool.fromEnvironment('STUDIO_PREVIEW', defaultValue: false);
+const configuredUrl = previewMode ? '' : String.fromEnvironment('STORE_URL', defaultValue: 'https://muanoluxe.web.app/admin');
 bool isAllowedStudioUrl(Uri uri) => uri.scheme == 'https' || (uri.scheme == 'http' && (uri.host == '127.0.0.1' || uri.host == 'localhost'));
 
 void main() async {

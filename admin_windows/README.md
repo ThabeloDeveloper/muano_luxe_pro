@@ -1,17 +1,9 @@
-# muanoluxe_studio
+# MuanoLuxe Studio for Windows
 
-A new Flutter project.
+The default release connects to https://muanoluxe.web.app/admin. It uses the live Firebase-backed studio and needs no local server or developer laptop.
 
-## Getting Started
+Distribute `releases/MuanoLuxe-Studio-Windows.zip`. Extract the entire archive on each Windows 10/11 x64 laptop and run `muanoluxe_studio.exe`. Keep the DLLs and data directory beside the executable. See RUN-ME.txt for sign-in and runtime installation instructions. Internet access is required.
 
-This project is a starting point for a Flutter application.
+Packaging follows [Flutter's Windows distribution guidance](https://docs.flutter.dev/platform-integration/windows/building). This is an x64 build; a separate ARM64 build is not included.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Build from the project root with `npm run build:windows`. Local preview is explicitly opt-in: `powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1 -Preview`. Flutter development builds also use the live URL by default; use `--dart-define=STUDIO_PREVIEW=true` only for local preview.

@@ -33,6 +33,8 @@ before(async () => {
       setDoc(doc(db, "orders/other"), { userId: "bob", total: 100 }),
       setDoc(doc(db, "subscribers/private"), { email: "private@example.com" }),
       setDoc(doc(db, "notifications/event"), { read: false }),
+      setDoc(doc(db, "conversations/private"), { userId: "alice", preview: "Private chat" }),
+      setDoc(doc(db, "conversations/private/messages/turn"), { userText: "Private question", assistantText: "Private answer" }),
       setDoc(doc(db, "settings/store"), { published: true }),
     ]);
   });
@@ -68,4 +70,17 @@ test("admin reads all studio data but writes must go through server validation",
   await assertSucceeds(getDoc(doc(db, "notifications/event")));
   await assertFails(setDoc(doc(db, "products/new"), { active: true }));
   await assertFails(setDoc(doc(db, "settings/store"), { published: false }));
+});
+test("conversation transcripts are admin-only and cannot be forged by any client", async () => {
+  for (const context of [env.unauthenticatedContext(), env.authenticatedContext('alice')]) {
+    const db = context.firestore();
+    await assertFails(getDoc(doc(db, 'conversations/private')));
+    await assertFails(getDocs(collection(db, 'conversations')));
+    await assertFails(getDoc(doc(db, 'conversations/private/messages/turn')));
+    await assertFails(setDoc(doc(db, 'conversations/private/messages/forged'), {assistantText:'Fake'}));
+  }
+  const db = env.authenticatedContext('staff', {admin:true}).firestore();
+  await assertSucceeds(getDoc(doc(db, 'conversations/private')));
+  await assertSucceeds(getDocs(collection(db, 'conversations/private/messages')));
+  await assertFails(setDoc(doc(db, 'conversations/private/messages/forged'), {assistantText:'Fake'}));
 });
