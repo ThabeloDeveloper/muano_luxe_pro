@@ -472,6 +472,35 @@ export const subscribe = onCall(
     return { ok: true };
   }),
 );
+function cleanCustomerProfile(data) {
+  const phoneInput = text(data.phone, 30, "phone number");
+  assert(/^[+\d\s().-]+$/.test(phoneInput), "Enter a valid phone number.");
+  let phone = phoneInput.replace(/[\s().-]/g, "");
+  if (phone.startsWith("00")) phone = "+" + phone.slice(2);
+  if (/^0[1-9]\d{8}$/.test(phone)) phone = "+27" + phone.slice(1);
+  else if (/^27[1-9]\d{8}$/.test(phone)) phone = "+" + phone;
+  else if (/^[1-9]\d{8}$/.test(phone)) phone = "+27" + phone;
+  assert(/^\+[1-9]\d{7,14}$/.test(phone), "Enter a valid phone number with the country code if outside South Africa.");
+  if (phone.startsWith("+27")) assert(/^\+27[1-9]\d{8}$/.test(phone), "Enter a valid South African phone number.");
+  return { ...cleanAddress({ ...data, phone }), updatedAt: stamp() };
+}
+export const getCustomerProfile = onCall(protectedCall, checked(async r => {
+  const uid = authenticated(r);
+  const profile = await db.doc(`customerProfiles/${uid}`).get();
+  return profile.exists ? profile.data() : {
+    name: text(r.auth.token.name || "", 100, "name", false),
+    email: text(r.auth.token.email || "", 150, "email", false),
+    phone: text(r.auth.token.phone_number || "", 30, "phone", false),
+    street: "", city: "", postalCode: "", province: "", notes: "", country: "ZA",
+  };
+}));
+export const saveCustomerProfile = onCall(protectedCall, checked(async r => {
+  const uid = authenticated(r);
+  await rateLimit(r, "profile", 10);
+  const profile = cleanCustomerProfile(r.data.profile || {});
+  await db.doc(`customerProfiles/${uid}`).set(profile);
+  return { ok: true };
+}));
 export const unsubscribe = onCall(
   protectedCall,
   checked(async (r) => {
@@ -739,6 +768,7 @@ const businessActivity = collection => onDocumentWritten({ document: `${collecti
 export const productActivity = businessActivity("products");
 export const settingsActivity = businessActivity("settings");
 export const subscriptionActivity = businessActivity("subscribers");
+export const customerProfileActivity = businessActivity("customerProfiles");
 export const orderActivity = businessActivity("orders");
 export const conversationActivity = onDocumentWritten({ document: "conversations/{conversation}/messages/{message}", retry: true }, async e => {
   await recordActivity(e.id, activityFor("messages", e.data?.before.data(), e.data?.after.data()));

@@ -1292,6 +1292,8 @@ export default function App() {
 
             <Checkout
 
+              user={user}
+
               bag={bag}
 
               products={products}
@@ -2195,7 +2197,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
             onChange={(e) => setPhone(e.target.value)}
 
-            placeholder="082 123 4567"
+            placeholder="0821234567"
             autoComplete="tel"
             aria-describedby="phone-format-help"
 
@@ -2209,7 +2211,7 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
         </label>
 
-        <p id="phone-format-help" className="body-copy">South African numbers may start with 0. For other countries, include + and the country code. A verification SMS is required.</p>
+        <p id="phone-format-help" className="body-copy">South African numbers work with or without spaces (for example 0821234567). Include + and a country code for other countries. A verification SMS is required.</p>
         {confirmation && (
 
           <label>
@@ -2304,12 +2306,27 @@ export function Auth({ onSuccess, notify, admin = false }) {
 
 }
 
-function Checkout({ bag, products, settings, requestId, notify, onSuccess }) {
+function CustomerFields({ profile, onChange }) {
+  const fields = [
+    ["name", "Full name", "name", "text"], ["email", "Email", "email", "email"],
+    ["phone", "Phone number", "tel", "tel"], ["street", "Street address", "street-address", "text"],
+    ["city", "City / town", "address-level2", "text"], ["province", "Province", "address-level1", "text"],
+    ["postalCode", "Postal code", "postal-code", "text"],
+  ];
+  return <>
+    {fields.map(([key, label, autocomplete, type]) => <label key={key}>
+      {label}<input name={key} type={type} autoComplete={autocomplete} required maxLength={key === "email" ? 150 : key === "street" ? 200 : key === "postalCode" ? 15 : 100} value={profile[key] || ""} onChange={e => onChange(key, e.target.value)} />
+    </label>)}
+    <label>Delivery notes (optional)<textarea name="notes" maxLength={500} value={profile.notes || ""} onChange={e => onChange("notes", e.target.value)} /></label>
+    <p className="fine-print">We save these details to your account to prepare and deliver your orders. South African delivery addresses only.</p>
+  </>;
+}
 
-  const [busy, setBusy] = useState(false),
-
-    [error, setError] = useState("");
-
+function Checkout({ bag, products, settings, requestId, notify, onSuccess, user }) {
+  const [profile, setProfile] = useState({name:user.displayName || "", email:user.email || "", phone:user.phoneNumber || "", street:"", city:"", province:"", postalCode:"", notes:""});
+  const [busy, setBusy] = useState(false), [error, setError] = useState("");
+  useEffect(() => { call("getCustomerProfile", {}).then(data => setProfile(p => ({...p,...data}))).catch(() => {}); }, [user.uid]);
+  const changeProfile = (key, value) => setProfile(p => ({...p,[key]:value}));
   const t = totals(bag, products, settings);
 
   return (
@@ -2339,6 +2356,8 @@ function Checkout({ bag, products, settings, requestId, notify, onSuccess }) {
             requestId,
 
           });
+
+          await call("saveCustomerProfile", { profile: form }).catch(() => {});
 
           if (!r.url?.startsWith("https://checkout.paystack.com/"))
 
@@ -2374,149 +2393,7 @@ function Checkout({ bag, products, settings, requestId, notify, onSuccess }) {
 
       </p>
 
-      <label>
-
-        Full name
-
-        <input name="name" autoComplete="name" required maxLength={100} />
-
-      </label>
-
-      <div className="form-row">
-
-        <label>
-
-          Email
-
-          <input
-
-            name="email"
-
-            type="email"
-
-            autoComplete="email"
-
-            required
-
-            maxLength={150}
-
-          />
-
-        </label>
-
-        <label>
-
-          Phone
-
-          <input
-
-            name="phone"
-
-            type="tel"
-
-            autoComplete="tel"
-
-            required
-
-            maxLength={30}
-
-          />
-
-        </label>
-
-      </div>
-
-      <label>
-
-        Street address
-
-        <input
-
-          name="street"
-
-          autoComplete="street-address"
-
-          required
-
-          maxLength={200}
-
-        />
-
-      </label>
-
-      <div className="form-row">
-
-        <label>
-
-          City
-
-          <input
-
-            name="city"
-
-            autoComplete="address-level2"
-
-            required
-
-            maxLength={100}
-
-          />
-
-        </label>
-
-        <label>
-
-          Postal code
-
-          <input
-
-            name="postalCode"
-
-            autoComplete="postal-code"
-
-            required
-
-            maxLength={15}
-
-          />
-
-        </label>
-
-      </div>
-
-      <label>
-
-        Province
-
-        <input
-
-          name="province"
-
-          autoComplete="address-level1"
-
-          required
-
-          maxLength={100}
-
-        />
-
-      </label>
-
-      <p className="fine-print">
-
-        South African delivery addresses only. Our team confirms delivery before
-
-        payment.
-
-      </p>
-
-      <label>
-
-        Delivery notes (optional)
-
-        <textarea name="notes" maxLength={500} />
-
-      </label>
+      <CustomerFields profile={profile} onChange={changeProfile} />
 
       <label className="checkbox">
 
@@ -2575,6 +2452,11 @@ function Account({ user, notify }) {
   const [orders, setOrders] = useState([]),
 
     [error, setError] = useState("");
+  const [profile, setProfile] = useState({name:user.displayName || "",email:user.email || "",phone:user.phoneNumber || "",street:"",city:"",province:"",postalCode:"",notes:""});
+  const [profileBusy,setProfileBusy]=useState(false);
+  useEffect(()=>{call("getCustomerProfile",{}).then(data=>setProfile(p=>({...p,...data}))).catch(()=>{});},[user.uid]);
+  const changeProfile=(key,value)=>setProfile(p=>({...p,[key]:value}));
+  async function saveProfile(e){e.preventDefault();setProfileBusy(true);try{await call("saveCustomerProfile",{profile});notify("Your delivery profile is saved.");}catch(error){notify(error.message || "Your profile could not be saved.");}finally{setProfileBusy(false);}}
 
   useEffect(
 
@@ -2641,6 +2523,13 @@ function Account({ user, notify }) {
         </button>
 
       </div>
+
+      <h3>Your delivery profile</h3>
+      <p className="body-copy">Save your contact details and delivery address to make checkout quicker.</p>
+      <form className="checkout-form" onSubmit={saveProfile}>
+        <CustomerFields profile={profile} onChange={changeProfile} />
+        <button className="button dark full" disabled={profileBusy}>{profileBusy ? "Saving…" : "Save delivery profile"}</button>
+      </form>
 
       <h3>Your orders</h3>
 

@@ -86,6 +86,8 @@ const sections = [
   { name: "Orders", icon: ShoppingBag },
 
   { name: "Subscribers", icon: Users },
+
+  { name: "Customers", icon: Users },
   { name: "Conversations", icon: Users },
 
   { name: "Notifications", icon: Bell },
@@ -139,6 +141,8 @@ export default function Admin({
     [orders, setOrders] = useState([]),
 
     [subscribers, setSubscribers] = useState([]),
+
+    [customerProfiles, setCustomerProfiles] = useState([]),
 
     [events, setEvents] = useState(live ? [] : demoEvents),
 
@@ -252,6 +256,12 @@ export default function Admin({
 
         fail,
 
+      ),
+
+      onSnapshot(
+        query(collection(db, "customerProfiles"), orderBy("updatedAt", "desc"), limit(500)),
+        (s) => setCustomerProfiles(s.docs.map((d) => ({ ...d.data(), id: d.id }))),
+        fail,
       ),
 
       onSnapshot(
@@ -1418,6 +1428,22 @@ export default function Admin({
 
             </section>
 
+          )}
+
+          {section === "Customers" && (
+            <section className="admin-card">
+              <div className="card-title"><h2>Customer delivery profiles</h2></div>
+              <p className="admin-note">Contact and delivery information customers saved to their accounts. Use these details only to support and fulfil their orders.</p>
+              {customerProfiles.length ? <div className="table-wrap"><table>
+                <thead><tr><th>Name</th><th>Contact</th><th>Delivery address</th><th>Updated</th></tr></thead>
+                <tbody>{customerProfiles.map((customer) => <tr key={customer.id}>
+                  <td>{customer.name}</td>
+                  <td>{customer.email}<br />{customer.phone}</td>
+                  <td>{[customer.street, customer.city, customer.province, customer.postalCode, "South Africa"].filter(Boolean).join(", ")}{customer.notes ? <><br /><small>Notes: {customer.notes}</small></> : null}</td>
+                  <td>{customer.updatedAt?.toDate?.().toLocaleDateString("en-ZA") || "Just now"}</td>
+                </tr>)}</tbody>
+              </table></div> : <div className="empty"><Users size={28}/><h3>No saved profiles yet.</h3><p>Customers can save their details from Your account.</p></div>}
+            </section>
           )}
 
           {section === "Notifications" && (
