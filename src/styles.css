@@ -1344,6 +1344,28 @@ footer {
 
 }
 
+.footer-credit {
+
+  border-top: 1px solid var(--line);
+
+  color: #94988b;
+
+  font-size: 9px;
+
+  padding: 14px 0 22px;
+
+  text-align: center;
+
+}
+
+.footer-credit a {
+
+  color: inherit;
+
+  text-underline-offset: 3px;
+
+}
+
 .chat-launch {
 
   position: fixed;

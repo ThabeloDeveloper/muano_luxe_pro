@@ -1204,6 +1204,13 @@ export default function App() {
 
         </div>
 
+        <div className="footer-credit">
+          Website developed and maintained by{" "}
+          <a href="https://www.mecaroid.co.za/" target="_blank" rel="noopener noreferrer">
+            Mecaroid Pty Ltd
+          </a>
+        </div>
+
       </footer>
 
       <button
